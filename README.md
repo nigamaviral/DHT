@@ -3,6 +3,7 @@
 For mid-term report:
 - All functionalities of chord
     - find_successor()
+	- find_predecessor()
     - fix_fingers()
     - stabilize()
     ...
@@ -23,19 +24,23 @@ Current implementation plan:
 - An application to launch the chord network
 - It takes 1 argument: n -> to create n nodes in mininet
 
-- Hash function: SHA-1
-- Size of finger table: log base 2 of 160 (because keys are distributed among 160 bits)
+- Hash function: SHA-1.
+- Size of finger table: log base 2 of x = 160 (because keys are distributed among 160 bits).
+						x is the size of the finger table.
 
 
-- This application gives an interface with following options:
+- This client application gives an interface with following options:
+    1. Lookup an item.
+    2. Insert an item.
+    3. Display pending client requests.
+
+- The chord server application gives an interface with following options:
+	0. Start Chord
     1. Add a node
     2. Remove a node
-    3. Lookup an item (will be asynchronous) - Dont Think So
-    4. Insert an item (will be asynchronous) - Dont Think So
-    5. Display current network - What does this mean ?
-    6. Display finger table (for debugging)
-    7. Display pending requests - What does this mean ?
-    8. Exit
+    3. Display a node's sucessor and predecessor details
+    4. Display finger table (for debugging)
+    5. Stop Chord
 
 
 Adding new node to chord network:
@@ -57,7 +62,7 @@ Lookup and insert:
 - The main application chooses one of the random nodes to make a client request (CR)
 - This node spawns a new thread to handle the request and stores connection details in a map
 - This thread makes an appropriate request (NR) looking into finger table
-- If the request fails, then it continues to request the node 1 behind in the finger table.  - What does this mean ?
+- If the request fails due to the jump node not responding, then it continues to request the node 1 behind in the finger table.
 - If everything fails, returns key not found. Otherwise, closes the current thread and keeps the connection open.
 - Once it receives back the answer, it passes the answer appropriate client by looking into map.
 - When a node receives NR request, it follows same steps as mentioned above, but doesn't store any details about the connection.
