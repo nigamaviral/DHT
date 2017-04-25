@@ -2,11 +2,14 @@
 
 For mid-term report:
 - All functionalities of chord
+	- create_finger_table()
     - find_successor()
 	- find_predecessor()
     - fix_fingers()
     - stabilize()
-    ...
+	- node_status()
+	- lookup()
+	- store()
 - Less Fault Tolerance (1 successor)
 - Single copy of data
 - Single Virtual Node per Physical Node
