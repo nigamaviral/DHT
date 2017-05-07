@@ -8,6 +8,7 @@ For mid-term report:
     - fix_fingers()
     - stabilize()
 	- node_status()
+	- generate_key()
 	- lookup()
 	- store()
 - Less Fault Tolerance (1 successor)
