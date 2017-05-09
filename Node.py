@@ -12,6 +12,10 @@ class Node:
     successor = None
     predecessor = None
     nxt = 0
+    node_address = ""
+
+    def __init__(self):
+        pass
 
     def __init__(self, node_address, node_port, id, successor, predecessor):
         self.node_address = node_address
@@ -38,25 +42,25 @@ class Node:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((address, port))
+            return False
         except:
             print("Unable to connect")
         return True
 
     def closest_preceding_node(self, id):
-        global finger_table_size
-        global finger
-        for i in range(finger_table_size, 1, -1):
-            if self.id < finger[i] < id:
-                return finger[i]
+        for i in range(self.finger_table_size, 1, -1):
+            if self.id < self.finger[i] < id:
+                return self.finger[i]
 
         return self.node_address
 
     def find_successor(self, id):
-        if self.id < id <= self.successor.node_address.id:
+        if self.id < id <= self.successor.id:
             return self.successor.node_address
         else:
             new_node = self.closest_preceding_node(id)
-            return new_node.find_successor(id)
+            address_port = new_node.split(":")
+            send(json.dumps(("successor", self.node_address)), address_port[0], address_port[1])
 
     def create(self):
         self.predecessor = None
@@ -80,6 +84,17 @@ class Node:
         if self.predecessor is None or self.predecessor.id < node.id < self.id:
             self.predecessor = node
 
+    def store(self, key):
+        key_hash = self.identify_key(key)
+        store_address = self.find_successor(key_hash)
+        address_port = store_address.split(":")
+        send(json.dumps(("store", key)), address_port[0], address_port[1])
+
+    def lookup(self, key, client_address, client_port):
+        key_hash = self.identify_key(key)
+        key_address = self.find_successor(key_hash)
+        send(json.dumps(("store", key_address)), client_address, client_port)
+
 def send(data, address, port):
     try:
         # print 'Sending %s to %s' % (data, neighbours[host])
@@ -96,7 +111,7 @@ def stabilize(self):
     self.successor.notify(node)
 
 def start_listening(address, port):
-
+    node = Node()
     print('starting server on ip %s' % address)
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversocket.bind((address, port))
@@ -112,16 +127,18 @@ def start_listening(address, port):
             data_type, data_received, sender = json.loads(data_received)
             print('%s received data $%s$ from %s' % (address, data_received, sender))
 
-            if data_received == 'notify':
+            if data_type == 'notify':
                 pass
-            elif data_received == 'get':
+            elif data_type == 'get':
                 pass
-            elif data_received == 'put':
+            elif data_type == 'put':
                 pass
-            elif data_received == 'join':
+            elif data_type == 'join':
                 pass
-            elif data_received == 'details':
+            elif data_type == 'details':
                 pass
+            elif data_type == 'successor':
+                node.find_successor(data_received)
 
             clientsocket.close()
     except:
