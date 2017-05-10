@@ -95,3 +95,31 @@ class QuaggaTopo(Topo):
         self.total_nodes += 1
 
 
+
+def disp_cur_nodes(net):
+    print '\nCurrent nodes in the network :'
+    for host in net.hosts:
+        print host.name, ' - ', host.IP()
+    print ''
+
+
+def start_chord(net):
+    cmd = 'python Chord.py %s %s %s %s >> /tmp/chord.log &'
+
+    rand_host = net.hosts[0]
+    for host in net.hosts:
+        host.cmdPrint(cmd % (host.name, host.IP(), rand_host.name, rand_host.IP()))
+
+def end_chord(net):
+    for host in net.hosts:
+        pid = int(host.cmd('echo $!'))
+        host.cmdPrint('kill -2 %s' % pid)
+
+def add_host(net):
+    print 'in add host function'
+    pass
+
+
+def remove_node(net, host_name):
+    print 'in remove node function'
+    pass

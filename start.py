@@ -22,11 +22,12 @@ from mininext.cli import CLI
 from mininext.net import MiniNExT
 
 from topo import QuaggaTopo
+from topo import *
+import time
 
 import pdb
 
 net = None
-
 
 def startNetwork():
     "instantiates a topo, then starts the network and prints debug information"
@@ -53,8 +54,42 @@ def startNetwork():
 
     info('** Running CLI\n')
     # pdb.set_trace()
-    CLI(net)
+    # CLI(net)
 
+    # import pdb; pdb.set_trace()
+
+    start_chord(net)
+
+    while True:
+        disp_cur_nodes(net)
+        print "\n1. Add Node"
+        print "2. Remove Node"
+        print "3. Details of Node"
+        print "4. Lookup"
+        print "5. Store"
+        print "6. Exit"
+
+        choice = int(input("Please enter your choice : "))
+
+        if choice == 1:
+            add_host(net)
+            print 'in add node'
+        elif choice == 2:
+            remove_node(net, 'a1')
+            print 'in remove node'
+        elif choice == 3:
+            print 'in details'
+        elif choice == 4:
+            print 'in lookup'
+        elif choice == 5:
+            print 'in store'
+        elif choice == 6:
+            end_chord(net)
+            print 'exiting'
+            time.sleep(1)
+            break
+        else:
+            print 'Invalid choice, please try again'
 
 def stopNetwork():
     "stops a network (only called on a forced cleanup)"

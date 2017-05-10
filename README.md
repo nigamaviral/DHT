@@ -29,8 +29,7 @@ Current implementation plan:
 - It takes 1 argument: n -> to create n nodes in mininet
 
 - Hash function: SHA-1.
-- Size of finger table: log base 2 of x = 160 (because keys are distributed among 160 bits).
-						x is the size of the finger table.
+- Size of finger table: 160 (because keys are distributed among 160 bits).
 
 
 - This client application gives an interface with following options:
