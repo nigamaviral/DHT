@@ -62,7 +62,7 @@ def startNetwork():
 
     while True:
         disp_cur_nodes(net)
-        print "\n1. Add Node"
+        print "1. Add Node"
         print "2. Remove Node"
         print "3. Details of Node"
         print "4. Lookup"
