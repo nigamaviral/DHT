@@ -115,11 +115,14 @@ def end_chord(net):
         pid = int(host.cmd('echo $!'))
         host.cmdPrint('kill -2 %s' % pid)
 
-def add_host(net):
+def add_host(net, topo):
     print 'in add host function'
-    pass
-
+    hostname, ip_address = topo.get_hostname_and_ip()
+    net.addHost(hostname)
+    net.get(hostname).setIP(ip_address)
+    net.addLink('fabric-sw1', hostname)
+    topo.increment_base_ip()
 
 def remove_node(net, host_name):
     print 'in remove node function'
-    pass
+    net.configLinkStatus('fabric-sw1', host_name, 'down')
