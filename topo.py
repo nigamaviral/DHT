@@ -121,6 +121,9 @@ def add_host(net, topo):
     net.addHost(hostname)
     net.get(hostname).setIP(ip_address)
     net.addLink('fabric-sw1', hostname)
+    cmd = 'python Chord.py %s %s %s %s >> /tmp/chord.log &'
+    rand_host = net.hosts[0]
+    net.get(hostname).cmdPrint(cmd % (host.name, host.IP(), rand_host.name, rand_host.IP()))
     topo.increment_base_ip()
 
 def remove_node(net, host_name):
