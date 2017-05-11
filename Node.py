@@ -19,11 +19,14 @@ class Node:
         self.id = self.identify_key(node_address)
         self.successor = (node_name, node_address, self.id)
         self.predecessor = (None, None, None)
-        self.finger = [(None, None, None) for i in range(self.finger_table_size)]
         self.nxt = 0
+        self.max_val = 2 ** self.finger_table_size
         if node_address != parent_ip:
             self.join(parent_name, parent_ip)
+        self.global_lock = threading.Lock()
+        self.finger = [(None, None, None) for i in range(self.finger_table_size)]
         self.finger[0] = self.successor
+        time.sleep(5)
 
     def identify_key(self, key):
         hash_obj = hashlib.sha1(key)
@@ -39,12 +42,16 @@ class Node:
         print 'writing to file'
         f = open(self.node_name + '.txt', 'w')
         s = '%s, %s %s\n' % (self.node_name, self.node_address, self.id)
-        s += '%s, %s %s\n' % (self.successor[0], self.successor[1], self.successor[2])
         s += '%s, %s %s\n' % (self.predecessor[0], self.predecessor[1], self.predecessor[2])
+        i = 1
+        for finger in self.finger:
+            s += '%s, %s, %s %s\n' % (i, finger[0], finger[1], finger[2])
+            i += 1
         f.write(s)
         f.close()
 
-    def has_failed(self, address, port):
+    def has_failed(self, address, port=1234):
+        return False
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((address, port))
@@ -56,12 +63,16 @@ class Node:
 
     def closest_preceding_node(self, id):
         for i in range(self.finger_table_size - 1, -1, -1):
-            if self.id < self.finger[i][2] <= id:
+            if self.id < self.finger[i][2] <= id and not self.has_failed(self.finger[i][1]):
                 return self.finger[i]
 
         return (self.node_name, self.node_address, self.id)
 
     def find_successor(self, id, base_node_address=None, base_node_name=None):
+        if self.predecessor[1] is not None and self.predecessor[2] < id <= self.id:
+            print 'found as predecessor for req', base_node_address, 'from', self.node_name
+            return (self.node_name, self.node_address, self.id)
+
         if base_node_address is None:
             if self.id < id <= self.successor[2]:
                 return self.successor
@@ -106,23 +117,27 @@ class Node:
     def stabilize(self):
         print 'in stabilize!'
         while self.stop_all is False:
-            # time.sleep(1)
-            self.disp_details()
-            if self.successor[1] == self.node_address:
-                continue
+            time.sleep(1)
+            self.global_lock.acquire()
+            successor = self.finger[0]
             pred_of_succ = self.find_predecessor_remote(self.successor[1])
-            successor = self.successor
-            if self.id < pred_of_succ[2] <= self.successor[2]:
-                successor = pred_of_succ
-            self.notify_remote(successor[1])
+            if pred_of_succ[1] is not None and self.id < pred_of_succ[2] <= successor[2] and \
+                    (self.id + 1) != successor[2] and not self.has_failed(pred_of_succ[1]):
+                self.finger[0] = pred_of_succ
+                self.successor = pred_of_succ
+            if self.successor[1] is not None and self.successor[1] != self.node_address:
+                self.notify_remote(self.successor[1])
 
+            self.disp_details()
+            self.global_lock.release()
             pass
         print 'finished'
 
     def join(self, ring_node_name, ring_node_address):
-        self.predecessor = (None, None, None)
-        time.sleep(1)
+        # time.sleep(1)
+        print 'about to call for successor to ', ring_node_address
         self.successor = self.find_successor(self.id, ring_node_address, ring_node_name)
+        print 'received ', self.successor[0], 'as successor on join'
 
     def check_predecessor(self):
         print 'in check predecessor'
@@ -138,16 +153,31 @@ class Node:
         print 'in fix fingers'
         while self.stop_all is False:
             # time.sleep(2)
-            next_id = self.id + (2 ** self.nxt)
+            self.global_lock.acquire()
+            next_id = (self.id + (2 ** self.nxt)) % (2 ** self.finger_table_size)
             self.finger[self.nxt] = self.find_successor(next_id)
             self.nxt = (self.nxt + 1) % self.finger_table_size
+            self.global_lock.release()
             pass
         print 'finished fix fingers'
 
     def notify(self, node_name, node_address, node_id):
         print 'received new predecessor for ', self.node_name, 'ie', node_address
-        if (self.predecessor[1] is None) or (self.predecessor[2] < node_id <= self.id):
+        if node_address == self.node_address:
+            return
+        if self.predecessor[1] is None or self.predecessor[2] < node_id <= self.id or \
+                self.has_failed(self.predecessor[1]):
             self.predecessor = (node_name, node_address, node_id)
+
+        self.global_lock.acquire()
+        for i in range(self.finger_table_size):
+            next_id = (self.id + (2 ** i)) % self.max_val
+            if self.finger[i][2] is None:
+                if next_id <= node_id:
+                    self.finger[i] = (node_name, node_address, node_id)
+            elif self.finger[i][2] > node_id:
+                self.finger[i] = (node_name, node_address, node_id)
+        self.global_lock.release()
         pass
 
     def store(self, key):

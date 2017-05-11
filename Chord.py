@@ -35,18 +35,6 @@ def send(data, address, port):
         print('exception while sending', sys.exc_info())
 
 
-def stabilize():
-    while stop_all is False:
-        pass
-    pass
-    '''
-    cur_node = self.successor.predecessor
-    if self.id < node.id < self.successor.id:
-        self.successor = node
-    self.successor.notify(node)
-    '''
-
-
 def start_listening(address, port):
     global stop_all
     print('starting server on ip %s' % address)
@@ -70,7 +58,7 @@ def start_listening(address, port):
             print('%s received data $%s$ from %s' % (node.node_name, data_received, sender))
 
             if data_type == 'notify':
-                node.notify(sender, address[0], data_received)
+                node.notify(sender, address[0], int(data_received))
                 pass
             elif data_type == 'get':
                 pass
@@ -83,7 +71,7 @@ def start_listening(address, port):
                 node.display_details()
                 pass
             elif data_type == 'successor':
-                successor = node.find_successor(data_received)
+                successor = node.find_successor(int(data_received))
                 print node.node_name, 'sending ', successor[1], ' as successor to', sender
                 clientsocket.sendall(json.dumps(successor).encode('utf8'))
             elif data_type == 'predecessor':

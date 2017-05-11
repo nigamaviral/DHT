@@ -8,6 +8,7 @@ import socket
 import time
 import json
 import sys
+import hashlib
 from mininext.topo import Topo
 from mininext.services.quagga import QuaggaService
 from mininet.link import Intf
@@ -111,9 +112,16 @@ def disp_cur_nodes(net):
 def start_chord(net):
     cmd = 'python Chord.py %s %s %s %s >> /tmp/chord.log &'
 
+    ids = [(int(hashlib.sha1(x.IP()).hexdigest(), 16), x.name, x.IP()) for x in net.hosts]
+    ids.sort()
+
     rand_host = net.hosts[0]
     for host in net.hosts:
-        host.cmdPrint(cmd % (host.name, host.IP(), rand_host.name, rand_host.IP()))
+        for i in range(len(ids)):
+            if ids[i][2] == host.IP():
+                j = (i + 1) % len(ids)
+                rand_host_id, rand_host_name, rand_host_ip = ids[j]
+        host.cmdPrint(cmd % (host.name, host.IP(), rand_host_name, rand_host_ip))
 
 def end_chord(net):
     for host in net.hosts:
