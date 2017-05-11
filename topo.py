@@ -4,6 +4,10 @@ Example topology of Quagga routers
 
 import inspect
 import os
+import socket
+import time
+import json
+import sys
 from mininext.topo import Topo
 from mininext.services.quagga import QuaggaService
 
@@ -129,3 +133,18 @@ def add_host(net, topo):
 def remove_node(net, host_name):
     print 'in remove node function'
     net.configLinkStatus('fabric-sw1', host_name, 'down')
+
+
+def get_details(net):
+    for host in net.hosts:
+        send(json.dumps(('details', '', '')), host.IP(), 1234)
+
+def send(data, address, port):
+    try:
+        # print 'Sending %s to %s' % (data, neighbours[host])
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((address, port))
+        s.sendall(data.encode('utf8'))
+    except:
+        print('exception while sending', sys.exc_info())
+

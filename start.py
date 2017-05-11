@@ -54,11 +54,11 @@ def startNetwork():
 
     info('** Running CLI\n')
     # pdb.set_trace()
-    # CLI(net)
 
     # import pdb; pdb.set_trace()
 
     start_chord(net)
+    CLI(net)
 
     while True:
         disp_cur_nodes(net)
@@ -72,12 +72,13 @@ def startNetwork():
         choice = int(input("Please enter your choice : "))
 
         if choice == 1:
-            add_host(net)
+            add_host(net, topo)
             print 'in add node'
         elif choice == 2:
             remove_node(net, 'a1')
             print 'in remove node'
         elif choice == 3:
+            get_details(net)
             print 'in details'
         elif choice == 4:
             print 'in lookup'
