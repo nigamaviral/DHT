@@ -1,30 +1,50 @@
 import socket
 import json
 import sys
-
+import random
 
 class Client:
     def lookup(self, data):
-        data = json.dumps(("get", data))
-        send_address, send_port = self.find_random_node()
-        self.send(data, send_address, send_port)
+        data = json.dumps(("lookup", data, 'client'))
+        send_address, send_port = self.find_random_node(), 1234
+        s = self.send(data, send_address, send_port)
+        if s is not None:
+            try:
+                print s.recv(4096).decode('utf8')
+                s.close()
+            except:
+                print 'Failed to get response'
+            return
+        print 'failed to send request'
 
     def store(self, data):
-        data = json.dumps(("put", data))
-        send_address, send_port = self.find_random_node()
-        self.send(data, send_address, send_port)
+        data = json.dumps(("store", data, 'client'))
+        send_address, send_port = self.find_random_node(), 1234
+        s = self.send(data, send_address, send_port)
+        if s is not None:
+            try:
+                print s.recv(4096).decode('utf8')
+                s.close()
+            except:
+                print 'Failed to get response'
+            return
+        print 'failed to send request'
 
     def find_random_node(self):
-        pass
+        hosts = ['172.0.1.1', '172.0.1.2', '172.0.1.3', '172.0.1.4', '172.0.1.5', '172.0.1.6'] 
+        return random.choice(hosts)
 
     def send(self, data, address, port):
         try:
-            # print 'Sending %s to %s' % (data, neighbours[host])
+            print 'Sending %s to %s' % (data, address)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
             s.connect((address, port))
             s.sendall(data.encode('utf8'))
+            return s
         except:
             print('exception while sending', sys.exc_info())
+        return None
 
     def start_listening(self, address, port):
         print('starting server on ip %s' % address)
@@ -50,15 +70,29 @@ class Client:
 
 if __name__ == '__main__':
     client = Client()
-    client.start_listening("127.0.0.1", "5000")
+    # client.start_listening("127.0.0.1", "5000")
+
+
+    # Code for timing analysis
+    '''
+    for i in range(int(sys.argv[1])):
+        client.lookup('fjg')
+
+    for i in range(int(sys.argv[1])):
+        client.store('fjg,anfd')
+    '''
 
     while True:
-        choice = (input("Enter Your Choice ?\n A) Lookup\n B) Store\n Enter A, B:"))
-        data = (input("Enter Data"))
+        choice = input("Enter Your Choice ?\n 1) Lookup\n 2) Store\n 3) Exit\nEnter 1, 2, 3:")
+        choice = int(input('Enter 1, 2, 3:'))
 
-        if choice == "A":
+        if choice == 1:
+            data = raw_input("Enter Data : ")
             client.lookup(data)
-        elif choice == "B":
+        elif choice == 2:
+            data = raw_input("Enter Data : ")
             client.store(data)
+        elif choice == 3:
+            break
         else:
             print("Invalid Choice. Try Again!!!")

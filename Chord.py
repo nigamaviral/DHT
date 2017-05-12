@@ -55,20 +55,31 @@ def start_listening(address, port):
             clientsocket, address = serversocket.accept()
             data_received = clientsocket.recv(4096).decode('utf8')
             data_type, data_received, sender = json.loads(data_received)
-            print('%s received data $%s$ from %s' % (node.node_name, data_received, sender))
+            print('%s, %s received data $%s$ from %s' % (data_type, node.node_name, data_received, sender))
 
             if data_type == 'notify':
                 node.notify(sender, address[0], int(data_received))
                 pass
+            elif data_type == 'lookup':
+                result = node.lookup(data_received)
+                clientsocket.sendall(result.encode('utf8'))
+                pass
+            elif data_type == 'store':
+                data_key, data_value = data_received.split(',', 1)
+                result = node.store(data_key, data_value)
+                if result is True:
+                    clientsocket.sendall('Success'.encode('utf8'))
+                else:
+                    clientsocket.sendall('Failed'.encode('utf8'))
+                pass
             elif data_type == 'get':
-                pass
+                result = node.get(data_received)
+                clientsocket.sendall(result.encode('utf8'))
             elif data_type == 'put':
-                pass
-            elif data_type == 'join':
-                pass
+                data_key, data_value = data_received.split(',', 1)
+                node.put(data_key, data_value)
             elif data_type == 'details':
-                print 'in details'
-                node.display_details()
+                print 'message received from mininet details', data_received
                 pass
             elif data_type == 'successor':
                 successor = node.find_successor(int(data_received))
