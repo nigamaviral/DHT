@@ -1,6 +1,6 @@
 # DHT
 ******
-May differ from actual implementation. This was initial paln. Function names might have added/changed in actual implementation
+May differ from actual implementation. This was initial plan. Function names might have added/changed in actual implementation
 ******
 
 Current implementation:
