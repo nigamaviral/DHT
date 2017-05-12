@@ -65,9 +65,7 @@ def startNetwork():
         print "1. Add Node"
         print "2. Remove Node"
         print "3. Details of Node"
-        print "4. Lookup"
-        print "5. Store"
-        print "6. Exit"
+        print "4. Exit"
 
         choice = int(input("Please enter your choice : "))
 
@@ -81,10 +79,6 @@ def startNetwork():
             get_details(net)
             print 'in details'
         elif choice == 4:
-            print 'in lookup'
-        elif choice == 5:
-            print 'in store'
-        elif choice == 6:
             end_chord(net)
             print 'exiting'
             time.sleep(1)
