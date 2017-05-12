@@ -1,6 +1,9 @@
 # DHT
+******
+May differ from actual implementation. This was initial paln. Function names might have added/changed in actual implementation
+******
 
-For mid-term report:
+Current implementation:
 - All functionalities of chord
 	- create_finger_table()
     - find_successor()
@@ -16,11 +19,10 @@ For mid-term report:
 - Single Virtual Node per Physical Node
 
 
-For final report:
-- Multiple successors (simple task).
-- Multiple copies of data (simple task).
-- Possibly multiple virtual nodes inside a physical node for better load balance.
-- Some analysis based on finger table size, etc. can be done.
+Future scope:
+- Multiple successors along with finger table
+- Multiple copies of data
+- Multiple virtual nodes inside a physical node for better load balance
 
 
 Current implementation plan:
@@ -69,4 +71,4 @@ Lookup and insert:
 - If everything fails, returns key not found. Otherwise, closes the current thread and keeps the connection open.
 - Once it receives back the answer, it passes the answer appropriate client by looking into map.
 - When a node receives NR request, it follows same steps as mentioned above, but doesn't store any details about the connection.
-- When does lookup stop ?
+
